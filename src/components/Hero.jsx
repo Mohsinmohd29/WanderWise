@@ -1,6 +1,14 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 function Hero() {
+    const [user] = useState(() => {
+        const storedUser = localStorage.getItem("user");
+
+        return storedUser
+            ? JSON.parse(storedUser)
+            : null;
+    });
     return (
         <section className="hero-section">
 
@@ -11,6 +19,12 @@ function Hero() {
                 <div className="row align-items-center">
 
                     <div className="col-lg-7">
+
+                        {user && (
+                            <p className="hero-welcome">
+                                Welcome {user.name}
+                            </p>
+                        )}
 
                         <p className="hero-tag">
                             ✦ DISCOVER • EXPLORE • EXPERIENCE
