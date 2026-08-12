@@ -1,4 +1,5 @@
 const Package = require("../models/Package");
+const Booking = require("../models/Booking");
 
 
 // Get all packages
@@ -258,6 +259,7 @@ const updatePackage = async (req, res) => {
 
 
 // Delete package
+// Delete package
 const deletePackage = async (req, res) => {
 
     try {
@@ -283,14 +285,23 @@ const deletePackage = async (req, res) => {
         }
 
 
+        // Delete all bookings associated with this package
+        await Booking.deleteMany({
+            package: req.params.id
+        });
+
+
+        // Delete the package
         await Package.findByIdAndDelete(req.params.id);
 
 
         res.status(200).json({
-            message: "Package deleted successfully"
+            message: "Package and associated bookings deleted successfully"
         });
 
     } catch (error) {
+
+        console.error("DELETE PACKAGE ERROR:", error);
 
         res.status(500).json({
             message: "Failed to delete package",
@@ -298,6 +309,7 @@ const deletePackage = async (req, res) => {
         });
 
     }
+
 };
 
 

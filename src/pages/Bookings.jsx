@@ -33,7 +33,19 @@ function Bookings() {
 
                 const data = await getMyBookings();
 
-                setBookings(Array.isArray(data) ? data : []);
+                /*
+                 * Only keep bookings whose package still exists.
+                 *
+                 * If a package was deleted, Mongoose returns
+                 * package as null after populate().
+                 *
+                 * We simply don't show those orphan bookings.
+                 */
+                const validBookings = Array.isArray(data)
+                    ? data.filter((booking) => booking.package)
+                    : [];
+
+                setBookings(validBookings);
 
             } catch (error) {
 
@@ -180,6 +192,10 @@ function Bookings() {
 
                         {bookings.map((booking) => {
 
+                            /*
+                             * This is guaranteed to exist because
+                             * we filtered out invalid bookings above.
+                             */
                             const packageData = booking.package;
 
                             const travelDate = booking.travelDate
@@ -187,12 +203,6 @@ function Bookings() {
                                 : null;
 
 
-                            /*
-                             * Convert prices safely.
-                             *
-                             * Some older bookings may not contain
-                             * pricePerPerson or totalPrice.
-                             */
                             const pricePerPerson =
                                 Number(booking.pricePerPerson ?? 0);
 
@@ -215,7 +225,7 @@ function Bookings() {
 
                                         {/* ================= PACKAGE IMAGE ================= */}
 
-                                        {packageData?.image && (
+                                        {packageData.image && (
 
                                             <img
                                                 src={packageData.image}
@@ -261,14 +271,11 @@ function Bookings() {
                                             {/* ================= PACKAGE ================= */}
 
                                             <h3 className="fw-bold mb-1">
-
-                                                {packageData?.title ||
-                                                    "Package unavailable"}
-
+                                                {packageData.title}
                                             </h3>
 
 
-                                            {packageData?.destination && (
+                                            {packageData.destination && (
 
                                                 <p className="text-success mb-3">
 
@@ -382,16 +389,12 @@ function Bookings() {
 
                                             {/* ================= VIEW PACKAGE ================= */}
 
-                                            {packageData?._id && (
-
-                                                <Link
-                                                    to={`/packages/${packageData._id}`}
-                                                    className="btn btn-outline-success w-100 mt-4"
-                                                >
-                                                    View Package
-                                                </Link>
-
-                                            )}
+                                            <Link
+                                                to={`/packages/${packageData._id}`}
+                                                className="btn btn-outline-success w-100 mt-4"
+                                            >
+                                                View Package
+                                            </Link>
 
                                         </div>
 
